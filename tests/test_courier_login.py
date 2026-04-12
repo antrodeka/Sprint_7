@@ -18,11 +18,13 @@ class TestCourierLogin:
     @allure.title('Успешная авторизация с валидными данными')
     def test_courier_logged_in_sucсess(self):
         payload = register_new_courier_and_return_login_password()
-        response = requests.post(Urls.URL_COURIER_LOGIN,
-                                 data={"login": payload[0],
-                                       "password": payload[1]})
-        assert (response.status_code == HTTPStatus.OK and
-                KEY_ID in response.text)
+        with allure.step("Авторизуемся валидной парой логин-пароль"):
+            response = requests.post(Urls.URL_COURIER_LOGIN,
+                                     data={"login": payload[0],
+                                           "password": payload[1]})
+        with allure.step("Проверяем, что получен код 200 id в тексте ответа"):
+            assert (response.status_code == HTTPStatus.OK and
+                    KEY_ID in response.text)
         delete_courier(response.json()["id"])
 
     @allure.title('Код 400 при авторизации с незаполненным полем логин/пароль')
@@ -31,14 +33,19 @@ class TestCourierLogin:
                               {login_for_registered_courier(), ''}])
     def test_auth_with_out_pass_or_login_bad_request_error(self, login,
                                                            password):
-        response = requests.post(Urls.URL_COURIER_LOGIN,
-                                 data={"login": login, "password": password})
-        assert (response.status_code == HTTPStatus.BAD_REQUEST and
-                ERROR_MESSAGE_BAD_REQUEST_AUTH in response.text)
+        with allure.step("Авторизуемся с незаполненным полем логин/пароль"):
+            response = requests.post(Urls.URL_COURIER_LOGIN,
+                                     data={"login": login,
+                                           "password": password})
+        with allure.step("Проверяем,что пришел код 409 и сообщение об ошибке"):
+            assert (response.status_code == HTTPStatus.BAD_REQUEST and
+                    ERROR_MESSAGE_BAD_REQUEST_AUTH in response.text)
 
     @allure.title('Код 404 при авторизации несуществующим курьером')
     def test_auth_not_exist_courier(self):
         payload = {"login": generate_login, "password": generate_pass}
-        response = requests.post(Urls.URL_COURIER_LOGIN, data=payload)
-        assert (response.status_code == HTTPStatus.NOT_FOUND and
-                ERROR_MESSAGE_NOT_FOUND in response.text)
+        with allure.step("Авторизуемся с несуществующими логином/паролем"):
+            response = requests.post(Urls.URL_COURIER_LOGIN, data=payload)
+        with allure.step("Проверяем, что получен код 404"):
+            assert (response.status_code == HTTPStatus.NOT_FOUND and
+                    ERROR_MESSAGE_NOT_FOUND in response.text)

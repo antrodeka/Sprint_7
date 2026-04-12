@@ -19,6 +19,9 @@ class TestOrderCreate:
     ])
     def test_order_create_with_diff_colors_success(self, color):
         payload = create_test_order(color)
-        response = requests.post(Urls.URL_ORDER_CREATE, json=payload)
-        assert (response.status_code == HTTPStatus.CREATED and
-                KEY_TRACK in response.json())
+        with allure.step("Создаем заказ с разным набором цветов"):
+            response = requests.post(Urls.URL_ORDER_CREATE, json=payload)
+        with allure.step("Проверяем, что получен ответ 201 "
+                         "и номер заказа в ответе"):
+            assert (response.status_code == HTTPStatus.CREATED and
+                    KEY_TRACK in response.json())

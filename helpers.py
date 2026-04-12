@@ -17,7 +17,7 @@ def generate_login():
 
 
 def generate_pass():
-    fake.password()
+    return fake.password()
 
 
 def genarate_courier_payload():
